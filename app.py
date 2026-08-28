@@ -106,15 +106,16 @@ st.markdown(
     }
 
     .block-container {
-        padding-top: 1.4rem;
+        padding-top: 4rem;
         padding-bottom: 3rem;
     }
 
     .inspectra-title {
-        font-size: 46px;
-        line-height: 1.05;
+        font-size: 44px;
+        line-height: 1.4;
         font-weight: 800;
         color: #102a43;
+        margin-top: 10px
         margin-bottom: 3px;
     }
 
