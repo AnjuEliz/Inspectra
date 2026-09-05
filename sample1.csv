@@ -2,10 +2,10 @@ Date,Transaction ID,Employee ID,Employee Name,Department,Bank Account,Amount,Ven
 2026-08-01,TXN1001,EMP01,Alice Smith,Finance,123456789,12500.00,Vendor A,Software Subscription,Accounts Payable,N/A,2026-08-16,12500.00,0.00,-12500.00
 2026-08-01,TXN1002,EMP02,Bob Jones,IT,987654321,4500.50,Vendor B,Hardware Supply,Accounts Payable,N/A,2026-08-16,4500.50,0.00,-4500.50
 2026-08-02,TXN1003,EMP03,Charlie Brown,HR,456789123,18500.00,Internal / N/A,Monthly Retainer,Accounts Receivable,Starlight Media,2026-08-17,0.00,18500.00,18500.00
-2026-08-02,TXN1004,EMP04,Diana Prince,Operations,321654987,620.00,Vendor C,Travel Reimbursement,Accounts Payable,N/A,2026-08-17,620.00,0.00,-620.00
+2026-08-02,TXN1004,EMP04,Diana Prince,Operations,321654987,62000.00,Vendor C,Travel Reimbursement,Accounts Payable,N/A,2026-08-17,62000.00,0.00,-62000.00
 2026-08-03,TXN1005,EMP05,Evan Wright,Procurement,654987321,34000.00,Internal / N/A,Consulting Services,Accounts Receivable,Horizon Retail,2026-08-18,0.00,34000.00,34000.00
 2026-08-03,TXN1006,EMP06,Fiona Gallagher,Sales,789123456,8900.00,Vendor D,Network Infrastructure,Accounts Payable,N/A,2026-08-18,8900.00,0.00,-8900.00
-2026-08-04,TXN1007,EMP01,Alice Smith,Finance,123456789,1200.00,Vendor A,Office Supplies,Accounts Payable,N/A,2026-08-19,1200.00,0.00,-1200.00
+2026-08-04,TXN1007,EMP01,Alice Smith,Finance,123456789,1200.00,Vendor X,Office Supplies,Accounts Payable,N/A,2026-08-19,1200.00,0.00,-1200.00
 2026-08-04,TXN1008,EMP02,Bob Jones,IT,987654321,22500.00,Internal / N/A,Monthly Retainer,Accounts Receivable,Omega Dynamics,2026-08-19,0.00,22500.00,22500.00
 2026-08-05,TXN1009,EMP03,Charlie Brown,HR,456789123,14300.00,Vendor B,Facility Maintenance,Accounts Payable,N/A,2026-08-20,14300.00,0.00,-14300.00
 2026-08-05,TXN1010,EMP04,Diana Prince,Operations,321654987,950.00,Vendor C,Travel Reimbursement,Accounts Payable,N/A,2026-08-20,950.00,0.00,-950.00
@@ -24,6 +24,7 @@ Date,Transaction ID,Employee ID,Employee Name,Department,Bank Account,Amount,Ven
 2026-08-12,TXN1023,EMP05,Evan Wright,Procurement,654987321,14200.00,Internal / N/A,Monthly Retainer,Accounts Receivable,Summit Group,2026-08-27,0.00,14200.00,14200.00
 2026-08-12,TXN1024,EMP06,Fiona Gallagher,Sales,789123456,2400.00,Vendor C,Hardware Supply,Accounts Payable,N/A,2026-08-27,2400.00,0.00,-2400.00
 2026-08-13,TXN1025,EMP01,Alice Smith,Finance,123456789,980.00,Vendor D,Office Supplies,Accounts Payable,N/A,2026-08-28,980.00,0.00,-980.00
+2026-08-07,TXN1013,EMP01,Alice Smith,Finance,123456789,15600.00,Internal / N/A,Monthly Retainer,Accounts Receivable,Pinnacle Systems,2026-08-22,0.00,15600.00,15600.00
 2026-08-13,TXN1026,EMP02,Bob Jones,IT,987654321,48000.00,Internal / N/A,Consulting Services,Accounts Receivable,Pinnacle Systems,2026-08-28,0.00,48000.00,48000.00
 2026-08-14,TXN1027,EMP03,Charlie Brown,HR,456789123,16100.00,Vendor A,Network Infrastructure,Accounts Payable,N/A,2026-08-28,16100.00,0.00,-16100.00
 2026-08-14,TXN1028,EMP04,Diana Prince,Operations,321654987,1150.00,Vendor B,Travel Reimbursement,Accounts Payable,N/A,2026-08-28,1150.00,0.00,-1150.00
