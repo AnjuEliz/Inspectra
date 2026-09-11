@@ -4,9 +4,18 @@ import pandas as pd
 import streamlit as st
 
 # ============================================================ #
-# 1. SIDEBAR MODULE NAVIGATION
+# 1. SIDEBAR MODULE NAVIGATION & STYLING
 # ============================================================ #
-st.sidebar.title("🔎 Inspectra Suite")
+st.sidebar.markdown(
+    """
+    <div style="padding: 10px 0px 15px 0px;">
+        <h2 style="margin:0; font-size: 22px; font-weight: 700; color: #1E293B;">🔎 Inspectra Suite</h2>
+        <p style="margin:2px 0 0 0; font-size: 12px; color: #64748B;">Audit & Financial Intelligence</p>
+    </div>
+""",
+    unsafe_allow_html=True,
+)
+
 app_mode = st.sidebar.radio(
     "Select Service Module:",
     [
@@ -15,6 +24,55 @@ app_mode = st.sidebar.radio(
     ],
     help="Switch between 100% transaction population screening and financial statement ratio analysis.",
 )
+
+# Custom Styling for Financial Statement Module
+FINANCIAL_CSS = """
+<style>
+    /* Metric Card styling */
+    div[data-testid="stMetric"] {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 18px 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    div[data-testid="stMetric"]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+    }
+    div[data-testid="stMetricLabel"] {
+        font-size: 0.85rem !important;
+        font-weight: 600 !important;
+        color: #475569 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    div[data-testid="stMetricValue"] {
+        font-size: 1.75rem !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        padding-top: 4px;
+    }
+    .metric-caption {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin-top: 6px;
+        line-height: 1.35;
+    }
+    .section-header {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #1e293b;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #e2e8f0;
+        margin: 28px 0 16px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+</style>
+"""
 
 # ============================================================ #
 # 2. FINANCIAL STATEMENT & CASH FLOW ANALYZER MODULE
@@ -65,6 +123,8 @@ def calculate_comprehensive_analytics(d):
 
 
 def render_financial_analyzer():
+    st.markdown(FINANCIAL_CSS, unsafe_allow_html=True)
+
     st.title("📊 Financial Statement & Ratio Analyzer")
     st.caption(
         "Automated financial health diagnostics across Liquidity, Profitability, Solvency, Activity, Working Capital, and Cash Flow metrics."
@@ -89,128 +149,210 @@ def render_financial_analyzer():
                 else pd.read_excel(uploaded_fs)
             )
             st.session_state["financial_df"] = df
-            st.success("Financial statement uploaded successfully!")
+            st.success("Financial statement loaded successfully!")
         except Exception as e:
             st.error(f"Error reading file: {e}")
 
     if "financial_df" in st.session_state:
         df = st.session_state["financial_df"]
-        st.markdown("---")
-        st.subheader("Financial Statement Inputs Overview")
-        st.dataframe(df, use_container_width=True)
+
+        with st.expander("📋 View Uploaded Statement Inputs", expanded=False):
+            st.dataframe(df, use_container_width=True)
 
         if len(df.columns) >= 2:
             data_dict = dict(zip(df.iloc[:, 0], df.iloc[:, 1]))
             analytics = calculate_comprehensive_analytics(data_dict)
 
-            # 1. Liquidity
-            st.markdown("### 💧 1. Liquidity Ratios")
+            # 1. Liquidity Ratios
+            st.markdown(
+                '<div class="section-header">💧 1. Liquidity Ratios</div>',
+                unsafe_allow_html=True,
+            )
             l1, l2, l3 = st.columns(3)
-            l1.metric("Current Ratio", analytics["Current Ratio"])
-            l1.caption(
-                "Measures ability to cover short-term debts with short-term assets."
-            )
-            l2.metric("Quick Ratio", analytics["Quick Ratio"])
-            l2.caption(
-                "Evaluates immediate debt-paying ability without relying on inventory."
-            )
-            l3.metric("Cash Ratio", analytics["Cash Ratio"])
-            l3.caption(
-                "Shows how effectively a firm pays liabilities using liquid cash."
-            )
+            with l1:
+                st.metric("Current Ratio", analytics["Current Ratio"])
+                st.markdown(
+                    '<p class="metric-caption">Measures ability to cover short-term debts with short-term assets.</p>',
+                    unsafe_allow_html=True,
+                )
+            with l2:
+                st.metric("Quick Ratio", analytics["Quick Ratio"])
+                st.markdown(
+                    '<p class="metric-caption">Evaluates immediate debt-paying ability without relying on inventory.</p>',
+                    unsafe_allow_html=True,
+                )
+            with l3:
+                st.metric("Cash Ratio", analytics["Cash Ratio"])
+                st.markdown(
+                    '<p class="metric-caption">Shows how effectively liquid cash reserves cover immediate debts.</p>',
+                    unsafe_allow_html=True,
+                )
 
-            # 2. Profitability
-            st.markdown("---")
-            st.markdown("### 📈 2. Profitability Ratios")
+            # 2. Profitability Ratios
+            st.markdown(
+                '<div class="section-header">📈 2. Profitability Ratios</div>',
+                unsafe_allow_html=True,
+            )
             p1, p2, p3 = st.columns(3)
-            p1.metric(
-                "Gross Profit Margin", f"{analytics['Gross Profit Margin (%)']}%"
-            )
-            p1.caption("Measures production efficiency and pricing power.")
-            p2.metric(
-                "Net Profit Margin", f"{analytics['Net Profit Margin (%)']}%"
-            )
-            p2.caption("Percentage of revenue remaining after all costs.")
-            p3.metric(
-                "Return on Assets (ROA)", f"{analytics['Return on Assets (%)']}%"
-            )
-            p3.caption(
-                "Efficiency of asset deployment for generating profit."
-            )
+            with p1:
+                st.metric(
+                    "Gross Margin", f"{analytics['Gross Profit Margin (%)']}%"
+                )
+                st.markdown(
+                    '<p class="metric-caption">Measures core production efficiency and pricing leverage.</p>',
+                    unsafe_allow_html=True,
+                )
+            with p2:
+                st.metric(
+                    "Net Profit Margin",
+                    f"{analytics['Net Profit Margin (%)']}%",
+                )
+                st.markdown(
+                    '<p class="metric-caption">Percentage of revenue remaining after all expenses and taxes.</p>',
+                    unsafe_allow_html=True,
+                )
+            with p3:
+                st.metric(
+                    "Return on Assets", f"{analytics['Return on Assets (%)']}%"
+                )
+                st.markdown(
+                    '<p class="metric-caption">Efficiency of asset deployment for profit generation.</p>',
+                    unsafe_allow_html=True,
+                )
 
-            # 3. Solvency
-            st.markdown("---")
-            st.markdown("### ⚖️ 3. Solvency Ratios")
+            # 3. Solvency Ratios
+            st.markdown(
+                '<div class="section-header">⚖️ 3. Solvency Ratios</div>',
+                unsafe_allow_html=True,
+            )
             s1, s2 = st.columns(2)
-            s1.metric("Debt-to-Equity", analytics["Debt to Equity"])
-            s1.caption(
-                "Evaluates financing split between debt and equity capital."
-            )
-            s2.metric(
-                "Interest Coverage", f"{analytics['Interest Coverage Ratio']}x"
-            )
-            s2.caption(
-                "Measures how easily operating profits pay interest obligations."
-            )
+            with s1:
+                st.metric("Debt to Equity", analytics["Debt to Equity"])
+                st.markdown(
+                    '<p class="metric-caption">Evaluates capital structure leverage and financial risk.</p>',
+                    unsafe_allow_html=True,
+                )
+            with s2:
+                st.metric(
+                    "Interest Coverage",
+                    f"{analytics['Interest Coverage Ratio']}x",
+                )
+                st.markdown(
+                    '<p class="metric-caption">Ability of operating profit to cover debt interest payments.</p>',
+                    unsafe_allow_html=True,
+                )
 
             # 4. Activity Ratios
-            st.markdown("---")
-            st.markdown("### 🔄 4. Activity Ratios")
-            a1, a2, a3 = st.columns(3)
-            a1.metric("Asset Turnover", f"{analytics['Asset Turnover']}x")
-            a1.caption("Efficiency of asset base in driving revenue.")
-            a2.metric("Days Sales Outstanding", f"{analytics['DSO (Days)']} Days")
-            a2.caption("Average days required to collect payment on credit.")
-            a3.metric(
-                "Inventory Turnover", f"{analytics['Inventory Turnover']}x"
+            st.markdown(
+                '<div class="section-header">🔄 4. Activity Ratios</div>',
+                unsafe_allow_html=True,
             )
-            a3.caption("Turnover speed of inventory into completed sales.")
+            a1, a2, a3 = st.columns(3)
+            with a1:
+                st.metric("Asset Turnover", f"{analytics['Asset Turnover']}x")
+                st.markdown(
+                    '<p class="metric-caption">Top-line revenue generated per unit of total assets.</p>',
+                    unsafe_allow_html=True,
+                )
+            with a2:
+                st.metric(
+                    "Days Sales Outstanding", f"{analytics['DSO (Days)']} Days"
+                )
+                st.markdown(
+                    '<p class="metric-caption">Average collection timeline for receivables.</p>',
+                    unsafe_allow_html=True,
+                )
+            with a3:
+                st.metric(
+                    "Inventory Turnover", f"{analytics['Inventory Turnover']}x"
+                )
+                st.markdown(
+                    '<p class="metric-caption">Frequency of inventory replacement over the cycle.</p>',
+                    unsafe_allow_html=True,
+                )
 
             # 5. Working Capital Management
-            st.markdown("---")
-            st.markdown("### 💼 5. Working Capital Management")
+            st.markdown(
+                '<div class="section-header">💼 5. Working Capital Management</div>',
+                unsafe_allow_html=True,
+            )
             w1, w2, w3, w4 = st.columns(4)
-            w1.metric(
-                "Net Working Capital",
-                f"₹{analytics['Net Working Capital']:,.2f}",
-            )
-            w1.caption("Short-term operational liquidity cushion.")
-            w2.metric("Days Inventory Outstanding", f"{analytics['DIO (Days)']} Days")
-            w2.caption("Average inventory holding time before sale.")
-            w3.metric("Days Payables Outstanding", f"{analytics['DPO (Days)']} Days")
-            w3.caption("Average timeline for clearing supplier payables.")
-            w4.metric(
-                "Cash Conversion Cycle (CCC)",
-                f"{analytics['Cash Conversion Cycle (CCC)']} Days",
-            )
-            w4.caption("Time required to convert operational inputs into cash.")
+            with w1:
+                st.metric(
+                    "Net Working Capital",
+                    f"₹{analytics['Net Working Capital']:,.2f}",
+                )
+                st.markdown(
+                    '<p class="metric-caption">Operational liquidity cushion for daily activities.</p>',
+                    unsafe_allow_html=True,
+                )
+            with w2:
+                st.metric(
+                    "Days Inventory Out", f"{analytics['DIO (Days)']} Days"
+                )
+                st.markdown(
+                    '<p class="metric-caption">Average duration inventory remains before sale.</p>',
+                    unsafe_allow_html=True,
+                )
+            with w3:
+                st.metric(
+                    "Days Payables Out", f"{analytics['DPO (Days)']} Days"
+                )
+                st.markdown(
+                    '<p class="metric-caption">Average timeline for settling trade payables.</p>',
+                    unsafe_allow_html=True,
+                )
+            with w4:
+                st.metric(
+                    "Cash Conversion Cycle",
+                    f"{analytics['Cash Conversion Cycle (CCC)']} Days",
+                )
+                st.markdown(
+                    '<p class="metric-caption">Total days needed to convert operations into cash.</p>',
+                    unsafe_allow_html=True,
+                )
 
             # 6. Cash Flow Analysis
-            st.markdown("---")
-            st.markdown("### 💵 6. Cash Flow Statement Analysis")
+            st.markdown(
+                '<div class="section-header">💵 6. Cash Flow Analysis</div>',
+                unsafe_allow_html=True,
+            )
             c1, c2, c3, c4 = st.columns(4)
-            c1.metric(
-                "Operating Cash Flow (CFO)",
-                f"₹{analytics['Operating Cash Flow (CFO)']:,.2f}",
-            )
-            c1.caption("Core cash generated from primary business activities.")
-            c2.metric(
-                "Free Cash Flow (FCF)",
-                f"₹{analytics['Free Cash Flow (FCF)']:,.2f}",
-            )
-            c2.caption("Cash left after funding operational costs and CapEx.")
-            c3.metric(
-                "Quality of Earnings (CFO/NI)",
-                f"{analytics['Earnings Quality (CFO/NI)']}x",
-            )
-            c3.caption(
-                "Ratio of operational cash flow to net accounting income."
-            )
-            c4.metric(
-                "CFO / Current Liabilities",
-                f"{analytics['CFO Coverage Ratio']}x",
-            )
-            c4.caption("Operating cash coverage of short-term liabilities.")
+            with c1:
+                st.metric(
+                    "Operating Cash Flow",
+                    f"₹{analytics['Operating Cash Flow (CFO)']:,.2f}",
+                )
+                st.markdown(
+                    '<p class="metric-caption">Cash generated directly from core business operations.</p>',
+                    unsafe_allow_html=True,
+                )
+            with c2:
+                st.metric(
+                    "Free Cash Flow",
+                    f"₹{analytics['Free Cash Flow (FCF)']:,.2f}",
+                )
+                st.markdown(
+                    '<p class="metric-caption">Cash remaining after funding operations and capital expenditure.</p>',
+                    unsafe_allow_html=True,
+                )
+            with c3:
+                st.metric(
+                    "Earnings Quality",
+                    f"{analytics['Earnings Quality (CFO/NI)']}x",
+                )
+                st.markdown(
+                    '<p class="metric-caption">Ratio of operating cash flow to net reported earnings.</p>',
+                    unsafe_allow_html=True,
+                )
+            with c4:
+                st.metric(
+                    "CFO Coverage", f"{analytics['CFO Coverage Ratio']}x"
+                )
+                st.markdown(
+                    '<p class="metric-caption">Operating cash coverage of short-term obligations.</p>',
+                    unsafe_allow_html=True,
+                )
 
 
 # Route view execution
@@ -218,9 +360,7 @@ if app_mode == "📊 Financial Statement & Ratio Analyzer":
     render_financial_analyzer()
     st.stop()  # Prevents executing the remaining 5,100+ lines below when in ratio mode
 
-# ============================================================ #
-# EXISTING FRAUD & ANOMALY DETECTION ENGINE BELOW (UNTOUCHED)
-# ============================================================ #
+# ==
 """
 INSPECTRA
 =========
