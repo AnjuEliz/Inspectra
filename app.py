@@ -1,3 +1,226 @@
+import math
+import numpy as np
+import pandas as pd
+import streamlit as st
+
+# ============================================================ #
+# 1. SIDEBAR MODULE NAVIGATION
+# ============================================================ #
+st.sidebar.title("🔎 Inspectra Suite")
+app_mode = st.sidebar.radio(
+    "Select Service Module:",
+    [
+        "🚨 Fraud & Anomaly Detection",
+        "📊 Financial Statement & Ratio Analyzer",
+    ],
+    help="Switch between 100% transaction population screening and financial statement ratio analysis.",
+)
+
+# ============================================================ #
+# 2. FINANCIAL STATEMENT & CASH FLOW ANALYZER MODULE
+# ============================================================ #
+
+
+def calculate_comprehensive_analytics(d):
+    """Calculates Ratios, Working Capital Metrics, and Cash Flow Diagnostics."""
+    ca, cl = d.get("Current Assets", 0), d.get("Current Liabilities", 1)
+    inv, cash = d.get("Inventory", 0), d.get("Cash & Equivalents", 0)
+    ta, eq = d.get("Total Assets", 1), d.get("Total Equity", 1)
+    debt, rev = d.get("Total Debt", 0), d.get("Revenue", 1)
+    cogs, ni = d.get("Cost of Goods Sold", 0), d.get("Net Income", 0)
+    ebit, interest = d.get("EBIT", 0), d.get("Interest Expense", 1)
+    ar, ap = d.get("Accounts Receivable", 0), d.get("Accounts Payable", 0)
+
+    cfo = d.get("Operating Cash Flow", 0)
+    capex = d.get("Capital Expenditures", 0)
+
+    gp = rev - cogs
+    avg_inv = d.get("Average Inventory", inv if inv != 0 else 1)
+
+    dso = (ar / rev) * 365 if rev else 0
+    dio = (inv / cogs) * 365 if cogs else 0
+    dpo = (ap / cogs) * 365 if cogs else 0
+
+    return {
+        "Current Ratio": round(ca / cl, 2) if cl else 0,
+        "Quick Ratio": round((ca - inv) / cl, 2) if cl else 0,
+        "Cash Ratio": round(cash / cl, 2) if cl else 0,
+        "Gross Profit Margin (%)": round((gp / rev) * 100, 2) if rev else 0,
+        "Net Profit Margin (%)": round((ni / rev) * 100, 2) if rev else 0,
+        "Return on Assets (%)": round((ni / ta) * 100, 2) if ta else 0,
+        "Debt to Equity": round(debt / eq, 2) if eq else 0,
+        "Interest Coverage Ratio": round(ebit / interest, 2) if interest else 0,
+        "Asset Turnover": round(rev / ta, 2) if ta else 0,
+        "DSO (Days)": round(dso, 1),
+        "Inventory Turnover": round(cogs / avg_inv, 2) if avg_inv else 0,
+        "Net Working Capital": ca - cl,
+        "DIO (Days)": round(dio, 1),
+        "DPO (Days)": round(dpo, 1),
+        "Cash Conversion Cycle (CCC)": round(dso + dio - dpo, 1),
+        "Operating Cash Flow (CFO)": cfo,
+        "Free Cash Flow (FCF)": cfo - capex,
+        "Earnings Quality (CFO/NI)": round((cfo / ni), 2) if ni else 0,
+        "CFO Coverage Ratio": round((cfo / cl), 2) if cl else 0,
+    }
+
+
+def render_financial_analyzer():
+    st.title("📊 Financial Statement & Ratio Analyzer")
+    st.caption(
+        "Automated financial health diagnostics across Liquidity, Profitability, Solvency, Activity, Working Capital, and Cash Flow metrics."
+    )
+
+    st.info(
+        "🔒 **Privacy & Legal Disclaimer:** All uploaded financial statements are processed strictly in-memory and are never stored on external servers. "
+        "Calculated metrics serve as automated decision-support tools and do not constitute formal statutory audit, tax, or legal advice."
+    )
+
+    uploaded_fs = st.file_uploader(
+        "Upload Financial Statement (CSV or Excel)",
+        type=["csv", "xlsx", "xls"],
+        key="fs_uploader",
+    )
+
+    if uploaded_fs is not None:
+        try:
+            df = (
+                pd.read_csv(uploaded_fs)
+                if uploaded_fs.name.endswith(".csv")
+                else pd.read_excel(uploaded_fs)
+            )
+            st.session_state["financial_df"] = df
+            st.success("Financial statement uploaded successfully!")
+        except Exception as e:
+            st.error(f"Error reading file: {e}")
+
+    if "financial_df" in st.session_state:
+        df = st.session_state["financial_df"]
+        st.markdown("---")
+        st.subheader("Financial Statement Inputs Overview")
+        st.dataframe(df, use_container_width=True)
+
+        if len(df.columns) >= 2:
+            data_dict = dict(zip(df.iloc[:, 0], df.iloc[:, 1]))
+            analytics = calculate_comprehensive_analytics(data_dict)
+
+            # 1. Liquidity
+            st.markdown("### 💧 1. Liquidity Ratios")
+            l1, l2, l3 = st.columns(3)
+            l1.metric("Current Ratio", analytics["Current Ratio"])
+            l1.caption(
+                "Measures ability to cover short-term debts with short-term assets."
+            )
+            l2.metric("Quick Ratio", analytics["Quick Ratio"])
+            l2.caption(
+                "Evaluates immediate debt-paying ability without relying on inventory."
+            )
+            l3.metric("Cash Ratio", analytics["Cash Ratio"])
+            l3.caption(
+                "Shows how effectively a firm pays liabilities using liquid cash."
+            )
+
+            # 2. Profitability
+            st.markdown("---")
+            st.markdown("### 📈 2. Profitability Ratios")
+            p1, p2, p3 = st.columns(3)
+            p1.metric(
+                "Gross Profit Margin", f"{analytics['Gross Profit Margin (%)']}%"
+            )
+            p1.caption("Measures production efficiency and pricing power.")
+            p2.metric(
+                "Net Profit Margin", f"{analytics['Net Profit Margin (%)']}%"
+            )
+            p2.caption("Percentage of revenue remaining after all costs.")
+            p3.metric(
+                "Return on Assets (ROA)", f"{analytics['Return on Assets (%)']}%"
+            )
+            p3.caption(
+                "Efficiency of asset deployment for generating profit."
+            )
+
+            # 3. Solvency
+            st.markdown("---")
+            st.markdown("### ⚖️ 3. Solvency Ratios")
+            s1, s2 = st.columns(2)
+            s1.metric("Debt-to-Equity", analytics["Debt to Equity"])
+            s1.caption(
+                "Evaluates financing split between debt and equity capital."
+            )
+            s2.metric(
+                "Interest Coverage", f"{analytics['Interest Coverage Ratio']}x"
+            )
+            s2.caption(
+                "Measures how easily operating profits pay interest obligations."
+            )
+
+            # 4. Activity Ratios
+            st.markdown("---")
+            st.markdown("### 🔄 4. Activity Ratios")
+            a1, a2, a3 = st.columns(3)
+            a1.metric("Asset Turnover", f"{analytics['Asset Turnover']}x")
+            a1.caption("Efficiency of asset base in driving revenue.")
+            a2.metric("Days Sales Outstanding", f"{analytics['DSO (Days)']} Days")
+            a2.caption("Average days required to collect payment on credit.")
+            a3.metric(
+                "Inventory Turnover", f"{analytics['Inventory Turnover']}x"
+            )
+            a3.caption("Turnover speed of inventory into completed sales.")
+
+            # 5. Working Capital Management
+            st.markdown("---")
+            st.markdown("### 💼 5. Working Capital Management")
+            w1, w2, w3, w4 = st.columns(4)
+            w1.metric(
+                "Net Working Capital",
+                f"₹{analytics['Net Working Capital']:,.2f}",
+            )
+            w1.caption("Short-term operational liquidity cushion.")
+            w2.metric("Days Inventory Outstanding", f"{analytics['DIO (Days)']} Days")
+            w2.caption("Average inventory holding time before sale.")
+            w3.metric("Days Payables Outstanding", f"{analytics['DPO (Days)']} Days")
+            w3.caption("Average timeline for clearing supplier payables.")
+            w4.metric(
+                "Cash Conversion Cycle (CCC)",
+                f"{analytics['Cash Conversion Cycle (CCC)']} Days",
+            )
+            w4.caption("Time required to convert operational inputs into cash.")
+
+            # 6. Cash Flow Analysis
+            st.markdown("---")
+            st.markdown("### 💵 6. Cash Flow Statement Analysis")
+            c1, c2, c3, c4 = st.columns(4)
+            c1.metric(
+                "Operating Cash Flow (CFO)",
+                f"₹{analytics['Operating Cash Flow (CFO)']:,.2f}",
+            )
+            c1.caption("Core cash generated from primary business activities.")
+            c2.metric(
+                "Free Cash Flow (FCF)",
+                f"₹{analytics['Free Cash Flow (FCF)']:,.2f}",
+            )
+            c2.caption("Cash left after funding operational costs and CapEx.")
+            c3.metric(
+                "Quality of Earnings (CFO/NI)",
+                f"{analytics['Earnings Quality (CFO/NI)']}x",
+            )
+            c3.caption(
+                "Ratio of operational cash flow to net accounting income."
+            )
+            c4.metric(
+                "CFO / Current Liabilities",
+                f"{analytics['CFO Coverage Ratio']}x",
+            )
+            c4.caption("Operating cash coverage of short-term liabilities.")
+
+
+# Route view execution
+if app_mode == "📊 Financial Statement & Ratio Analyzer":
+    render_financial_analyzer()
+    st.stop()  # Prevents executing the remaining 5,100+ lines below when in ratio mode
+
+# ============================================================ #
+# EXISTING FRAUD & ANOMALY DETECTION ENGINE BELOW (UNTOUCHED)
+# ============================================================ #
 """
 INSPECTRA
 =========
